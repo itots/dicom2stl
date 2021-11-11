@@ -11,13 +11,14 @@ Written by David T. Chen from the National Institute of Allergy
 and Infectious Diseases, dchen@mail.nih.gov.
 It is covered by the Apache License, Version 2.0:
 http://www.apache.org/licenses/LICENSE-2.0
+
+Modified by Tsuyoshi Ito on 2020-09-09.
 """
 
 
 from __future__ import print_function
 import sys
 import os
-import fnmatch
 import zipfile
 import SimpleITK as sitk
 
@@ -26,12 +27,14 @@ def scanDirForDicom(dicomdir):
     matches = []
     dirs = []
     for root, dirnames, filenames in os.walk(dicomdir):
-        for filename in fnmatch.filter(filenames, '*.dcm'):
-            matches.append(os.path.join(root, filename))
-            if root not in dirs:
-                dirs.append(root)
+        for filename in filenames:
+            # .DCM can also be read
+            if filename.lower().endswith(".dcm"):
+                matches.append(os.path.join(root, filename))
+                if root not in dirs:
+                    dirs.append(root)
 
-    return (matches, dirs)
+    return matches, dirs
 
 
 def getAllSeries(dirs):
@@ -87,6 +90,11 @@ def loadLargestSeries(dicomdir):
     files = ss[2]
     isr.SetFileNames(files)
     print("\nLoading series", ss[0], "in directory", ss[1])
+
+    # To load metadata
+    isr.MetaDataDictionaryArrayUpdateOn()
+    isr.LoadPrivateTagsOn()
+
     img = isr.Execute()
 
     firstslice = sitk.ReadImage(files[0])

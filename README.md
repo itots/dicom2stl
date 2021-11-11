@@ -1,3 +1,18 @@
+This is a forked repository of [dicom2stl](https://github.com/dave3d/dicom2stl) 
+that is distributed in the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+This repository was modified from the original to add a new script, create_mesh.py.
+The create_mesh.py imports dicom series, 
+conducts segmentation based on watershed algorithm or global threshold, 
+and makes 3D surface models using the original scripts. 
+Note that the dicomutils.py and vtkutils.py, implemented in the original repository, 
+were slightly modified for implementation in the create_mesh.py.
+
+Tsuyoshi Ito  
+November 11, 2021
+
+---
+
+
 dicom2stl
 =========
 

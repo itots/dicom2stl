@@ -8,6 +8,8 @@ Written by David T. Chen from the National Institute of Allergy and
 Infectious Diseases, dchen@mail.nih.gov.
 It is covered by the Apache License, Version 2.0:
 http://www.apache.org/licenses/LICENSE-2.0
+
+Modified by Tsuyoshi Ito on 2020-09-07.
 """
 
 from __future__ import print_function
@@ -40,7 +42,7 @@ def elapsedTime(start_time):
 #
 
 
-def extractSurface(vol, isovalue=0.0):
+def extractSurface(vol, isovalue=0.5):
     """Extract an isosurface from a volume."""
     try:
         t = time.perf_counter()
@@ -114,6 +116,8 @@ def smoothMesh(mesh, nIterations=10):
             smooth.SetInputData(mesh)
         else:
             smooth.SetInput(mesh)
+        # To prevent position translation
+        smooth.NormalizeCoordinatesOn()
         smooth.Update()
         print("Surface smoothed")
         m2 = smooth.GetOutput()
@@ -328,7 +332,8 @@ def writePLY(mesh, name):
             writer.SetInputData(mesh)
         else:
             writer.SetInput(mesh)
-        writer.SetFileTypeToBinary()
+        #writer.SetFileTypeToBinary()
+        writer.SetFileTypeToASCII()
         writer.SetFileName(name)
         writer.Write()
         print("Output mesh:", name)
