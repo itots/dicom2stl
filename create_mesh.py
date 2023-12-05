@@ -36,7 +36,8 @@ def main():
         vtkutils.elapsedTime(t)
 
     # Write image as NIfTi format
-    sitk.WriteImage(img, args.output + ".nii")
+    if args.save_volume is not None:
+        sitk.WriteImage(img, args.output + ".nii")
 
     # Resampling
     if args.resample_cubic:
@@ -108,6 +109,12 @@ def parse_arguments():
                         default=None,
                         type=float,
                         help="Spacing for resampling")
+
+    parser.add_argument("-v",
+                        "--save_volume",
+                        action="store",
+                        dest="save_volume",
+                        help="Save volume as NIfTi format or not")
 
     parser.add_argument("-c",
                         "--resample_cubic",
