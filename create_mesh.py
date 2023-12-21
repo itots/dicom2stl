@@ -14,9 +14,9 @@ from utils import dicomutils
 from utils import vtkutils
 
 __author__ = "ITO Tsuyoshi"
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __email__ = "ito.tsuyoshi.3a@kyoto-u.ac.jp"
-__date__ = "2020-09-07"
+__date__ = "2023-12-21"
 
 
 def main():
@@ -36,7 +36,7 @@ def main():
         vtkutils.elapsedTime(t)
 
     # Write image as NIfTi format
-    if args.save_volume is not None:
+    if args.save_volume:
         sitk.WriteImage(img, args.output + ".nii")
 
     # Resampling
@@ -112,7 +112,7 @@ def parse_arguments():
 
     parser.add_argument("-v",
                         "--save_volume",
-                        action="store",
+                        action="store_true",
                         dest="save_volume",
                         help="Save volume as NIfTi format or not")
 
