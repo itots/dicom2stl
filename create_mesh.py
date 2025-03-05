@@ -14,9 +14,9 @@ from utils import dicomutils
 from utils import vtkutils
 
 __author__ = "ITO Tsuyoshi"
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __email__ = "ito.tsuyoshi.3a@kyoto-u.ac.jp"
-__date__ = "2023-12-21"
+__date__ = "2025-03-05"
 
 
 def main():
@@ -76,6 +76,9 @@ def main():
     # Reduce mesh
     if args.reduce_mesh is not None:
         mesh = vtkutils.reduceMesh(mesh, args.reduce_mesh)
+    
+    # To avoid keeping normals in newer versions of vtk 
+    mesh.GetPointData().SetNormals(None)
 
     # Smooth mesh
     if args.smooth_mesh is not None:
