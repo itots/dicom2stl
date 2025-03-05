@@ -11,25 +11,45 @@ Written by David T. Chen from the National Institute of Allergy
 and Infectious Diseases, dchen@mail.nih.gov.
 It is covered by the Apache License, Version 2.0:
 http://www.apache.org/licenses/LICENSE-2.0
+
+Modified by Tsuyoshi Ito on 2020-09-09.
+Updated by Tsuyoshi Ito on 2023-12-05.
 """
 
 
 from __future__ import print_function
 import sys
 import os
-import fnmatch
 import zipfile
 import SimpleITK as sitk
+
+from pydicom.filereader import read_file_meta_info
+from pydicom.errors import InvalidDicomError
+
+
+def testDicomFile(file_path):
+    """Test if given file is in DICOM format."""
+    try:
+        read_file_meta_info(file_path)
+        return True
+    except InvalidDicomError:
+        return False
 
 
 def scanDirForDicom(dicomdir):
     matches = []
     dirs = []
-    for root, dirnames, filenames in os.walk(dicomdir):
-        for filename in fnmatch.filter(filenames, '*.dcm'):
-            matches.append(os.path.join(root, filename))
-            if root not in dirs:
-                dirs.append(root)
+    try:
+        for root, dirnames, filenames in os.walk(dicomdir):
+            for filename in filenames:
+                # .DCM can also be read
+                if filename.lower().endswith(".dcm"):
+                    matches.append(os.path.join(root, filename))
+                    if root not in dirs:
+                        dirs.append(root)
+    except BaseException as e:
+        print("Error in scanDirForDicom: ", e)
+        print("dicomdir = ", dicomdir)
 
     return (matches, dirs)
 
@@ -68,6 +88,11 @@ def loadLargestSeries(dicomdir):
     """
 
     files, dirs = scanDirForDicom(dicomdir)
+
+    if (len(files) == 0) or (len(dirs) == 0):
+        print("Error in loadLargestSeries.  No files found.")
+        print("dicomdir = ", dicomdir)
+        return None
     seriessets = getAllSeries(dirs)
     maxsize = 0
     maxindex = -1
@@ -87,6 +112,11 @@ def loadLargestSeries(dicomdir):
     files = ss[2]
     isr.SetFileNames(files)
     print("\nLoading series", ss[0], "in directory", ss[1])
+
+    # To load metadata
+    isr.MetaDataDictionaryArrayUpdateOn()
+    isr.LoadPrivateTagsOn()
+
     img = isr.Execute()
 
     firstslice = sitk.ReadImage(files[0])
@@ -96,12 +126,13 @@ def loadLargestSeries(dicomdir):
 
 
 def loadZipDicom(name, tempDir):
-    """ Unzip a zipfile of dicom images into a temp directory, then
-        load the series that has the most slices.
+    """Unzip a zipfile of dicom images into a temp directory, then
+    load the series that has the most slices.
     """
 
     print("Reading Dicom zip file:", name)
-    myzip = zipfile.ZipFile(name, 'r')
+    print("tempDir = ", tempDir)
+    myzip = zipfile.ZipFile(name, "r")
 
     try:
         myzip.extractall(tempDir)
@@ -120,9 +151,9 @@ if __name__ == "__main__":
     print("dicomutils.py")
     print(sys.argv[1])
 
-#    img = loadLargestSeries(sys.argv[1])
-#    print (img)
-#    sys.exit(0)
+    #    img = loadLargestSeries(sys.argv[1])
+    #    print (img)
+    #    sys.exit(0)
 
     files, dirs = scanDirForDicom(sys.argv[1])
     print("")

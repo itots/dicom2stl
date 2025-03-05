@@ -2,8 +2,15 @@ name: dicom2stl
 
 channels:
   - simpleitk
+  - bioconda
+  - conda-forge
+  - defaults
 
 dependencies:
   - simpleitk
-  - vtk
   - numpy
+  - pip
+  - pip:
+    - pydicom
+    - vtk
+    - simpleitkutilities
